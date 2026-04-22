@@ -86,20 +86,16 @@ object TunnelManager {
             val maskedToken = "${TOKEN.take(6)}...${TOKEN.takeLast(4)}"
             addLog("Using token: $maskedToken")
 
-            val processBuilder = ProcessBuilder(
-                binaryFile.absolutePath,
-                "tunnel",
-                "run",
-                "--token",
-                TOKEN
-            ).apply {
-                redirectErrorStream(false) // Keep stdout and stderr separate
+            // Try multiple execution methods
+            process = tryDirectExecution(binaryFile) ?: tryShellExecution(binaryFile)
+
+            if (process == null) {
+                addLog("All execution methods failed", true)
+                return false
             }
 
-            addLog("Executing: cloudflared tunnel run --token [MASKED]")
-
-            process = processBuilder.start()
             isRunning = true
+            addLog("Tunnel process started successfully")
 
             // Start monitoring job
             job = CoroutineScope(Dispatchers.IO).launch {
@@ -110,13 +106,81 @@ object TunnelManager {
             val intent = Intent(context, TunnelService::class.java)
             ContextCompat.startForegroundService(context, intent)
 
-            addLog("Tunnel process started successfully")
             true
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             addLog("Failed to start tunnel process: ${e.message}", true)
             isRunning = false
             false
         }
+    }
+
+    private fun tryDirectExecution(binaryFile: File): Process? {
+        return try {
+            addLog("Trying direct execution...")
+            val processBuilder = ProcessBuilder(
+                binaryFile.absolutePath,
+                "tunnel",
+                "run",
+                "--token",
+                TOKEN
+            ).apply {
+                redirectErrorStream(false)
+                // Set environment variables that might help
+                environment()["LD_LIBRARY_PATH"] = "/system/lib64:/system/lib"
+            }
+
+            val process = processBuilder.start()
+            addLog("Direct execution successful")
+            process
+        } catch (e: IOException) {
+            addLog("Direct execution failed: ${e.message}")
+            null
+        }
+    }
+
+    private fun tryShellExecution(binaryFile: File): Process? {
+        return try {
+            addLog("Trying shell execution fallback...")
+
+            // Method 1: Use sh -c
+            val shellCommand = "/system/bin/sh -c \"${binaryFile.absolutePath} tunnel run --token $TOKEN\""
+            addLog("Shell command: $shellCommand")
+
+            val processBuilder = ProcessBuilder(
+                "/system/bin/sh",
+                "-c",
+                "${binaryFile.absolutePath} tunnel run --token $TOKEN"
+            ).apply {
+                redirectErrorStream(false)
+                environment()["LD_LIBRARY_PATH"] = "/system/lib64:/system/lib"
+            }
+
+            val process = processBuilder.start()
+            addLog("Shell execution successful")
+            process
+        } catch (e: IOException) {
+            addLog("Shell execution failed: ${e.message}")
+
+            // Method 2: Try different shell paths
+            try {
+                addLog("Trying alternative shell path...")
+                val processBuilder = ProcessBuilder(
+                    "sh",
+                    "-c",
+                    "${binaryFile.absolutePath} tunnel run --token $TOKEN"
+                ).apply {
+                    redirectErrorStream(false)
+                }
+
+                val process = processBuilder.start()
+                addLog("Alternative shell execution successful")
+                process
+            } catch (e2: IOException) {
+                addLog("Alternative shell execution also failed: ${e2.message}")
+                null
+            }
+        }
+    }
     }
 
     fun stopTunnel() {
