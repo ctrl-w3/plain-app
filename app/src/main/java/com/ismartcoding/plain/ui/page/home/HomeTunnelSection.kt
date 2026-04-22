@@ -146,7 +146,7 @@ fun HomeTunnelSection(
                         }
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.content_copy),
+                            painter = painterResource(R.drawable.copy),
                             contentDescription = "Copy logs",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )

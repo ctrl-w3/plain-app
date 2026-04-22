@@ -8,6 +8,7 @@ import com.ismartcoding.lib.helpers.CoroutinesHelper.coIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -131,38 +132,40 @@ object TunnelManager {
         val proc = this.process ?: return
 
         try {
-            // Monitor stdout
-            launch {
-                try {
-                    BufferedReader(InputStreamReader(proc.inputStream)).use { reader ->
-                        var line = reader.readLine()
-                        while (line != null && isActive) {
-                            addLog("STDOUT: $line")
-                            line = reader.readLine()
+            coroutineScope {
+                // Monitor stdout
+                launch {
+                    try {
+                        BufferedReader(InputStreamReader(proc.inputStream)).use { reader ->
+                            var line = reader.readLine()
+                            while (line != null && isActive) {
+                                addLog("STDOUT: $line")
+                                line = reader.readLine()
+                            }
                         }
+                    } catch (e: IOException) {
+                        addLog("Error reading stdout: ${e.message}", true)
                     }
-                } catch (e: IOException) {
-                    addLog("Error reading stdout: ${e.message}", true)
                 }
-            }
 
-            // Monitor stderr
-            launch {
-                try {
-                    BufferedReader(InputStreamReader(proc.errorStream)).use { reader ->
-                        var line = reader.readLine()
-                        while (line != null && isActive) {
-                            val isError = line.lowercase().contains("error") ||
-                                        line.lowercase().contains("failed") ||
-                                        line.lowercase().contains("connection refused") ||
-                                        line.lowercase().contains("invalid") ||
-                                        line.lowercase().contains("timeout")
-                            addLog("STDERR: $line", isError)
-                            line = reader.readLine()
+                // Monitor stderr
+                launch {
+                    try {
+                        BufferedReader(InputStreamReader(proc.errorStream)).use { reader ->
+                            var line = reader.readLine()
+                            while (line != null && isActive) {
+                                val isError = line.lowercase().contains("error") ||
+                                            line.lowercase().contains("failed") ||
+                                            line.lowercase().contains("connection refused") ||
+                                            line.lowercase().contains("invalid") ||
+                                            line.lowercase().contains("timeout")
+                                addLog("STDERR: $line", isError)
+                                line = reader.readLine()
+                            }
                         }
+                    } catch (e: IOException) {
+                        addLog("Error reading stderr: ${e.message}", true)
                     }
-                } catch (e: IOException) {
-                    addLog("Error reading stderr: ${e.message}", true)
                 }
             }
 
