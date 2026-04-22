@@ -91,6 +91,6 @@
     <string name="disable_remote_access">Disable Remote Access</string>
     <string name="adb_cmd_start">Start HTTP Server</string>
     <string name="adb_cmd_stop">Stop HTTP Server</string>
-    <string name="connecting">Connecting...</string>
+    <string name="tunnel_connecting">Connecting...</string>
     <string name="tunnel_logs">Tunnel Logs</string>
 </resources>

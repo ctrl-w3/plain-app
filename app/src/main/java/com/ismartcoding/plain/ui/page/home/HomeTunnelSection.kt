@@ -88,7 +88,7 @@ fun HomeTunnelSection(
                 Text(
                     text = when (tunnelState) {
                         TunnelState.OFF -> stringResource(R.string.remote_access_off)
-                        TunnelState.CONNECTING -> stringResource(R.string.connecting)
+                        TunnelState.CONNECTING -> stringResource(R.string.tunnel_connecting)
                         TunnelState.ON -> stringResource(R.string.remote_access_on)
                     },
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -210,7 +210,7 @@ fun HomeTunnelSection(
                 )
 
                 TunnelState.CONNECTING -> PFilledButton(
-                    text = stringResource(R.string.connecting),
+                    text = stringResource(R.string.tunnel_connecting),
                     onClick = {},
                     buttonSize = ButtonSize.LARGE,
                     enabled = false,
