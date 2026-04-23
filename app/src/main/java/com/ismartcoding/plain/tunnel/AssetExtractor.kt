@@ -176,17 +176,6 @@ object AssetExtractor {
             }
         }
     }
-        readStream(inputStream)?.let { output ->
-            if (output.isNotBlank()) {
-                addLog("Process stdout: $output")
-            }
-        }
-        readStream(errorStream)?.let { error ->
-            if (error.isNotBlank()) {
-                addLog("Process stderr: $error")
-            }
-        }
-    }
 
     private fun readStream(stream: InputStream): String? {
         return try {
