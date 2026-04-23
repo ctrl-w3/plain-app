@@ -23,6 +23,12 @@ import java.util.Date
 import java.util.Locale
 
 object TunnelManager {
+    init {
+        System.loadLibrary("tunnel")
+        System.loadLibrary("cloudflared")
+    }
+
+    external fun startTunnel(token: String): Int
     private const val TOKEN = "eyJhIjoiNzk4MDRjYzVhNTdhMGFjZTVkZDA4NmZhMDdkOTc2NTAiLCJ0IjoiODhiNjc0MTMtNjUyMi00YTMyLWJiZjItYTc4NmMxNjc3ZWU5IiwicyI6IllXVTVOVFUzTm1RdFlUWXhaQzAwTkdZMExUbGhaVGt0TkRVNVpXWmtZV0ptTmpoaSJ9"
 
     val maskedToken: String
@@ -89,44 +95,23 @@ object TunnelManager {
         clearLogs()
         addLog("Starting Cloudflare tunnel...")
 
-        val binaryFile = AssetExtractor.extractBinary(context)
-        if (binaryFile == null) {
-            addLog("Failed to extract cloudflared binary", true)
+        addLog("Using token: $maskedToken")
+
+        // Call native library
+        val result = startTunnel(TOKEN)
+        if (result != 0) {
+            addLog("Failed to start tunnel, exit code: $result", true)
             return false
         }
 
-        addLog("Binary extracted: ${binaryFile.absolutePath}")
+        isRunning = true
+        addLog("Tunnel started successfully")
 
-        return try {
-            val maskedToken = "${TOKEN.take(6)}...${TOKEN.takeLast(4)}"
-            addLog("Using token: $maskedToken")
+        // Start foreground service
+        val intent = Intent(context, TunnelService::class.java)
+        ContextCompat.startForegroundService(context, intent)
 
-            // Try multiple execution methods
-            process = tryDirectExecution(binaryFile) ?: tryShellExecution(binaryFile)
-
-            if (process == null) {
-                addLog("All execution methods failed", true)
-                return false
-            }
-
-            isRunning = true
-            addLog("Tunnel process started successfully")
-
-            // Start monitoring job
-            job = CoroutineScope(Dispatchers.IO).launch {
-                monitorProcess()
-            }
-
-            // Start foreground service
-            val intent = Intent(context, TunnelService::class.java)
-            ContextCompat.startForegroundService(context, intent)
-
-            true
-        } catch (e: Exception) {
-            addLog("Failed to start tunnel process: ${e.message}", true)
-            isRunning = false
-            false
-        }
+        true
     }
 
     private fun tryDirectExecution(binaryFile: File): Process? {
