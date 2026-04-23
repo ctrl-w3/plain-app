@@ -124,7 +124,7 @@ fun HomeTunnelSection(
             )
 
             // Show logs when tunnel is enabled
-            if (tunnelEnabled && logs.isNotEmpty()) {
+            if (tunnelEnabled && logs.value.isNotEmpty()) {
                 VerticalSpace(16.dp)
                 HorizontalDivider()
                 VerticalSpace(12.dp)
@@ -142,7 +142,7 @@ fun HomeTunnelSection(
                     IconButton(
                         onClick = {
                             val clipboard = ContextCompat.getSystemService(localContext, ClipboardManager::class.java)
-                            val clip = ClipData.newPlainText("Tunnel Logs", logs)
+                            val clip = ClipData.newPlainText("Tunnel Logs", logs.value)
                             clipboard?.setPrimaryClip(clip)
                             Toast.makeText(localContext, "Logs copied to clipboard", Toast.LENGTH_SHORT).show()
                         }
@@ -168,8 +168,8 @@ fun HomeTunnelSection(
                     val coroutineScope = rememberCoroutineScope()
 
                     // Auto-scroll to bottom when logs change
-                    LaunchedEffect(logs) {
-                        if (logs.isNotEmpty()) {
+                    LaunchedEffect(logs.value) {
+                        if (logs.value.isNotEmpty()) {
                             coroutineScope.launch {
                                 scrollState.animateScrollTo(scrollState.maxValue)
                             }
@@ -183,7 +183,7 @@ fun HomeTunnelSection(
                             .horizontalScroll(rememberScrollState())
                             .padding(12.dp)
                     ) {
-                        if (logs.isEmpty()) {
+                        if (logs.value.isEmpty()) {
                             Text(
                                 text = "No logs available yet...",
                                 style = MaterialTheme.typography.bodySmall,
@@ -191,8 +191,9 @@ fun HomeTunnelSection(
                                 fontFamily = FontFamily.Monospace
                             )
                         } else {
+                            val logText = logs.value
                             val annotatedString = buildAnnotatedString {
-                                logs.lines().forEach { line ->
+                                logText.lines().forEach { line: String ->
                                     if (line.contains("[ERROR]")) {
                                         withStyle(style = SpanStyle(color = Color.Red, fontFamily = FontFamily.Monospace)) {
                                             append(line)
