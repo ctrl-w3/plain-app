@@ -98,15 +98,21 @@ object HttpModule {
                 return@intercept finish()
             }
 
-            // Check for secret key on external requests
+            // Check for secret key on external requests, but allow static files
             val host = call.request.origin.remoteHost
             val key = call.request.queryParameters["key"]
             val isLocal = host == "localhost" || host == "127.0.0.1" || host.startsWith("192.168.") || host.startsWith("10.")
+            val isStaticFile = call.request.path().contains('.')
 
-            if (!isLocal && key != "SECRET123") {
+            if (!isLocal && !isStaticFile && key != "SECRET123") {
                 call.respond(HttpStatusCode.Forbidden, "Access denied. Use ?key=SECRET123")
                 return@intercept finish()
             }
+
+            // Add CORS headers
+            call.response.headers.append("Access-Control-Allow-Origin", "*")
+            call.response.headers.append("Access-Control-Allow-Methods", "*")
+            call.response.headers.append("Access-Control-Allow-Headers", "*")
 
             call.response.headers.append("X-Server-Time", System.currentTimeMillis().toString())
         }

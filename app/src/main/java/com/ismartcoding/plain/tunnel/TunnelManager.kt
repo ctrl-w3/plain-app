@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -27,7 +28,8 @@ object TunnelManager {
         get() = "${TOKEN.take(6)}...${TOKEN.takeLast(4)}"
 
     private var job: Job? = null
-    private var isRunning = false
+    val isTunnelRunning: Boolean
+        get() = isRunning
     private val logBuffer = StringBuilder()
     private val _logs = MutableStateFlow("")
     val logs: StateFlow<String> = _logs
@@ -186,7 +188,7 @@ object TunnelManager {
     }
 
     private suspend fun monitorTunnel(context: Context) {
-        while (isActive) {
+        while (currentCoroutineContext().isActive) {
             runTermuxCommand(context, "cat tunnel.log 2>/dev/null || echo 'Log file not found'", background = false)
             delay(1000)
 

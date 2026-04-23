@@ -116,7 +116,7 @@ fun TunnelConsolePage(
                     // Auto-scroll toggle
                     IconButton(onClick = { autoScroll = !autoScroll }) {
                         Icon(
-                            imageVector = if (autoScroll) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            imageVector = if (autoScroll) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                             contentDescription = if (autoScroll) "Disable auto-scroll" else "Enable auto-scroll"
                         )
                     }
@@ -127,14 +127,14 @@ fun TunnelConsolePage(
                         clipboard?.setPrimaryClip(clip)
                         Toast.makeText(context, "Logs copied to clipboard", Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copy logs")
+                        Icon(imageVector = Icons.Filled.ContentCopy, contentDescription = "Copy logs")
                     }
                     // Clear logs
                     IconButton(onClick = {
                         // Note: Clearing logs would require modifying TunnelManager to expose a clear method
                         Toast.makeText(context, "Clear logs not implemented", Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear logs")
+                        Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear logs")
                     }
                     // Stop tunnel
                     if (TunnelManager.isTunnelRunning) {
@@ -143,7 +143,7 @@ fun TunnelConsolePage(
                             mainVM.enableTunnel(context, false)
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Stop,
+                                imageVector = Icons.Filled.Stop,
                                 contentDescription = "Stop tunnel",
                                 tint = MaterialTheme.colorScheme.error
                             )
