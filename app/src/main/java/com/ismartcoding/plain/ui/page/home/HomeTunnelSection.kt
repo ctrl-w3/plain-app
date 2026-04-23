@@ -47,13 +47,15 @@ import com.ismartcoding.plain.ui.base.PFilledButton
 import com.ismartcoding.plain.ui.base.VerticalSpace
 import com.ismartcoding.plain.ui.models.MainViewModel
 import com.ismartcoding.plain.ui.theme.cardBackgroundNormal
-import com.ismartcoding.plain.tunnel.TunnelManager
+import androidx.navigation.NavController
+import com.ismartcoding.plain.ui.nav.Routing
 
 enum class TunnelState { OFF, CONNECTING, ON }
 
 @Composable
 fun HomeTunnelSection(
     context: Context,
+    navController: NavController,
     mainVM: MainViewModel,
     tunnelEnabled: Boolean,
 ) {
@@ -215,6 +217,13 @@ fun HomeTunnelSection(
                     }
                 }
             }
+
+            VerticalSpace(12.dp)
+            PFilledButton(
+                text = "View Full Console",
+                onClick = { navController.navigate(Routing.TunnelConsole) },
+                buttonSize = ButtonSize.SMALL,
+            )
 
             VerticalSpace(24.dp)
             when (tunnelState) {

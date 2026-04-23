@@ -106,6 +106,7 @@ fun HomeWeb(
             VerticalSpace(dp = 24.dp)
             HomeTunnelSection(
                 context = context,
+                navController = navController,
                 mainVM = mainVM,
                 tunnelEnabled = mainVM.tunnelEnabled
             )

@@ -111,6 +111,7 @@ fun MainNavGraph(
         },
     ) {
         composable<Routing.Home> { HomePage(navController, mainVM, updateVM) }
+        composable<Routing.TunnelConsole> { TunnelConsolePage(navController, mainVM) }
         composable<Routing.Images> { ImagesPage(navController) }
         composable<Routing.Videos> { VideosPage(navController) }
         composable<Routing.Audio> { AudioPage(navController, audioPlaylistVM) }

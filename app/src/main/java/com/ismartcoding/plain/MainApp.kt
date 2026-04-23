@@ -44,7 +44,7 @@ import com.ismartcoding.plain.receivers.PlugInControlReceiver
 import com.ismartcoding.plain.ui.base.coil.newImageLoader
 import com.ismartcoding.plain.chat.ChatCacheManager
 import com.ismartcoding.plain.web.HttpServerManager
-import com.ismartcoding.plain.workers.FeedFetchWorker
+import com.ismartcoding.plain.tunnel.TunnelManager
 import dalvik.system.ZipPathValidator
 
 class MainApp : Application() {
@@ -62,6 +62,8 @@ class MainApp : Application() {
         LogCat.addLogAdapter(DiskLogAdapter(DiskLogFormatStrategy.getInstance(this)))
 
         AppEvents.register()
+
+        TunnelManager.initialize(this)
 
         // https://stackoverflow.com/questions/77683434/the-getnextentry-method-of-zipinputstream-throws-a-zipexception-invalid-zip-ent
         if (isUPlus()) {

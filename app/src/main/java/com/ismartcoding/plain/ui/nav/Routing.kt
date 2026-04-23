@@ -7,6 +7,9 @@ class Routing {
     object Home
 
     @Serializable
+    object TunnelConsole
+
+    @Serializable
     object Settings
 
     @Serializable
