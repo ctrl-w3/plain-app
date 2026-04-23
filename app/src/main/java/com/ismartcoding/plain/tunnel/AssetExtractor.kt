@@ -20,8 +20,8 @@ object AssetExtractor {
 
         // Try multiple extraction locations
         val locations = listOf(
-            context.filesDir,
             context.codeCacheDir,
+            context.filesDir,
             context.cacheDir,
             File("/data/local/tmp") // System temp directory (may require root)
         )
@@ -110,7 +110,7 @@ object AssetExtractor {
 
     private fun runChmod(binaryFile: File): Boolean {
         return try {
-            val process = Runtime.getRuntime().exec(arrayOf("chmod", "700", binaryFile.absolutePath))
+            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", "chmod 755 ${binaryFile.absolutePath}"))
             val exitCode = process.waitFor()
             addLog("chmod exit code: $exitCode")
 
@@ -155,11 +155,20 @@ object AssetExtractor {
                 val magic = ByteArray(4)
                 raf.read(magic)
                 // ELF magic number: 0x7F 'E' 'L' 'F'
-                magic[0] == 0x7F.toByte() && magic[1] == 'E'.code.toByte() &&
-                magic[2] == 'L'.code.toByte() && magic[3] == 'F'.code.toByte()
+                val isElf = magic[0] == 0x7F.toByte() && magic[1] == 'E'.code.toByte() &&
+                        magic[2] == 'L'.code.toByte() && magic[3] == 'F'.code.toByte()
+                if (!isElf) return false
+
+                // Read machine type (offset 18-19, little endian)
+                raf.seek(18)
+                val machine = raf.readUnsignedShort()
+                val supportedMachines = listOf(0x28, 0xB7) // ARM, ARM64
+                val isSupportedArch = supportedMachines.contains(machine)
+                addLog("ELF machine type: 0x${machine.toString(16)}, supported: $isSupportedArch")
+                isSupportedArch
             }
         } catch (e: Exception) {
-            addLog("Failed to check ELF magic: ${e.message}")
+            addLog("Failed to check ELF: ${e.message}")
             false
         }
     }
