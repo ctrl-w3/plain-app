@@ -39,6 +39,20 @@ object TunnelManager {
     val isTunnelRunning: Boolean
         get() = isRunning && process?.isAlive == true
 
+    // Public method for external classes to add logs
+    fun addToLogs(logLine: String) {
+        synchronized(logBuffer) {
+            logBuffer.append(logLine)
+            // Keep only last 1000 lines to prevent memory issues
+            val lines = logBuffer.toString().split("\n")
+            if (lines.size > 1000) {
+                logBuffer.setLength(0)
+                logBuffer.append(lines.takeLast(1000).joinToString("\n"))
+            }
+        }
+        _logs.value = logBuffer.toString()
+    }
+
     private fun addLog(message: String, isError: Boolean = false) {
         val timestamp = dateFormat.format(Date())
         val prefix = if (isError) "[ERROR]" else "[INFO]"

@@ -211,5 +211,13 @@ object AssetExtractor {
 
     private fun addLog(message: String) {
         LogCat.d("Cloudflared: $message")
+        // Also add to tunnel logs for UI display
+        try {
+            val timestamp = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+            val logLine = "$timestamp [INFO] $message\n"
+            TunnelManager.addToLogs(logLine)
+        } catch (e: Exception) {
+            // Ignore if TunnelManager is not initialized yet
+        }
     }
 }
