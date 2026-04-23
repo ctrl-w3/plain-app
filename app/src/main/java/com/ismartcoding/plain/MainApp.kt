@@ -45,6 +45,7 @@ import com.ismartcoding.plain.ui.base.coil.newImageLoader
 import com.ismartcoding.plain.chat.ChatCacheManager
 import com.ismartcoding.plain.web.HttpServerManager
 import com.ismartcoding.plain.tunnel.TunnelManager
+import com.ismartcoding.plain.workers.FeedFetchWorker
 import dalvik.system.ZipPathValidator
 
 class MainApp : Application() {

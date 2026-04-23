@@ -25,6 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,13 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.ismartcoding.plain.R
 import com.ismartcoding.plain.enums.ButtonSize
 import com.ismartcoding.plain.enums.ButtonType
 import com.ismartcoding.plain.ui.base.PFilledButton
 import com.ismartcoding.plain.ui.base.VerticalSpace
 import com.ismartcoding.plain.ui.models.MainViewModel
-import com.ismartcoding.plain.ui.theme.cardBackground
 import com.ismartcoding.plain.tunnel.TunnelManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -113,7 +116,7 @@ fun TunnelConsolePage(
                     // Auto-scroll toggle
                     IconButton(onClick = { autoScroll = !autoScroll }) {
                         Icon(
-                            painter = painterResource(if (autoScroll) R.drawable.pause else R.drawable.play),
+                            imageVector = if (autoScroll) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (autoScroll) "Disable auto-scroll" else "Enable auto-scroll"
                         )
                     }
@@ -124,14 +127,14 @@ fun TunnelConsolePage(
                         clipboard?.setPrimaryClip(clip)
                         Toast.makeText(context, "Logs copied to clipboard", Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(painter = painterResource(R.drawable.copy), contentDescription = "Copy logs")
+                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = "Copy logs")
                     }
                     // Clear logs
                     IconButton(onClick = {
                         // Note: Clearing logs would require modifying TunnelManager to expose a clear method
                         Toast.makeText(context, "Clear logs not implemented", Toast.LENGTH_SHORT).show()
                     }) {
-                        Icon(painter = painterResource(R.drawable.delete), contentDescription = "Clear logs")
+                        Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear logs")
                     }
                     // Stop tunnel
                     if (TunnelManager.isTunnelRunning) {
@@ -140,7 +143,7 @@ fun TunnelConsolePage(
                             mainVM.enableTunnel(context, false)
                         }) {
                             Icon(
-                                painter = painterResource(R.drawable.stop),
+                                imageVector = Icons.Default.Stop,
                                 contentDescription = "Stop tunnel",
                                 tint = MaterialTheme.colorScheme.error
                             )

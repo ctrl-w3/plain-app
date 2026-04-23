@@ -49,6 +49,7 @@ import com.ismartcoding.plain.ui.page.notes.NotesPage
 import com.ismartcoding.plain.ui.page.pomodoro.PomodoroPage
 import com.ismartcoding.plain.ui.page.home.HomePage
 import com.ismartcoding.plain.ui.page.home.HomeFeaturesSelectionPage
+import com.ismartcoding.plain.ui.page.home.TunnelConsolePage
 import com.ismartcoding.plain.ui.page.scan.ScanHistoryPage
 import com.ismartcoding.plain.ui.page.scan.ScanPage
 import com.ismartcoding.plain.ui.page.tools.SoundMeterPage
