@@ -1,12 +1,41 @@
 #include <jni.h>
 #include <dlfcn.h>
 #include <android/log.h>
+#include <pthread.h>
 
 #define LOG_TAG "TunnelJNI"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-typedef int (*start_tunnel_func)(const char*);
+static JavaVM *jvm = NULL;
+static jmethodID logCallbackMethod = NULL;
+static jobject tunnelManagerObj = NULL;
+
+typedef int (*start_tunnel_func)(const char*, void (*)(const char*));
+
+// Callback function called from Go
+void log_callback(const char* message) {
+    if (jvm == NULL || logCallbackMethod == NULL || tunnelManagerObj == NULL) {
+        LOGI("Log callback not set: %s", message);
+        return;
+    }
+
+    JNIEnv *env;
+    (*jvm)->AttachCurrentThread(jvm, &env, NULL);
+
+    jstring jMessage = (*env)->NewStringUTF(env, message);
+    (*env)->CallVoidMethod(env, tunnelManagerObj, logCallbackMethod, jMessage);
+    (*env)->DeleteLocalRef(env, jMessage);
+
+    (*jvm)->DetachCurrentThread(jvm);
+}
+
+JNIEXPORT void JNICALL Java_com_ismartcoding_plain_tunnel_TunnelManager_setLogCallback(JNIEnv *env, jobject obj) {
+    (*env)->GetJavaVM(env, &jvm);
+    jclass clazz = (*env)->GetObjectClass(env, obj);
+    logCallbackMethod = (*env)->GetMethodID(env, clazz, "onNativeLog", "(Ljava/lang/String;)V");
+    tunnelManagerObj = (*env)->NewGlobalRef(env, obj);
+}
 
 JNIEXPORT jint JNICALL Java_com_ismartcoding_plain_tunnel_TunnelManager_startTunnel(JNIEnv *env, jobject obj, jstring token) {
     LOGI("Starting tunnel via JNI");
@@ -34,8 +63,8 @@ JNIEXPORT jint JNICALL Java_com_ismartcoding_plain_tunnel_TunnelManager_startTun
         return -1;
     }
 
-    LOGI("Calling start_tunnel with token");
-    int result = func(token_str);
+    LOGI("Calling start_tunnel with token and callback");
+    int result = func(token_str, log_callback);
 
     // Release string
     (*env)->ReleaseStringUTFChars(env, token, token_str);

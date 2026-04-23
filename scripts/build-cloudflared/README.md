@@ -28,16 +28,19 @@ import (
 )
 
 //export start_tunnel
-func start_tunnel(token *C.char) C.int {
+func start_tunnel(token *C.char, logCallback unsafe.Pointer) C.int {
     goToken := C.GoString(token)
     os.Args = []string{"cloudflared", "tunnel", "run", "--token", goToken}
 
-    // Note: This is a simplification. In reality, you need to modify cmd/cloudflared
-    // to export the Execute function or create a wrapper.
-    // For production, integrate with the actual cmd.Execute logic.
+    // Set up logging callback
+    // In the actual cloudflared code, redirect logs to the callback
+    // For example, replace log.Printf with callback calls
+    // The callback is a C function pointer that can be called from Go
 
-    // For now, assume we call the main logic
-    // This requires modifying the cloudflared source to make Execute exportable.
+    // This requires modifying the logging in cloudflared to use the callback
+
+    return 0 // Success
+}
 
     return 0 // Success
 }
@@ -80,8 +83,31 @@ cp libcloudflared.so ../../../app/src/main/jniLibs/arm64-v8a/
 cp libcloudflared.h ../../../app/src/main/cpp/
 ```
 
-## Notes
+## Log Streaming
 
-- This requires modifying cloudflared source code to expose the tunnel functionality as a library function.
-- For log streaming, modify the Go code to accept a callback function that sends logs back to Java via JNI.
-- Ensure all dependencies are statically linked for Android compatibility.
+To enable log streaming to the Android UI:
+
+1. Modify cloudflared's logging to accept a callback.
+
+2. In the Go code, define the callback type:
+
+```go
+type LogCallback func(message *C.char)
+
+var logCb LogCallback
+```
+
+3. Export a function to set the callback:
+
+```go
+//export set_log_callback
+func set_log_callback(cb unsafe.Pointer) {
+    logCb = (LogCallback)(cb)
+}
+```
+
+4. In start_tunnel, call set_log_callback with the passed pointer.
+
+5. Replace log.Printf calls with logCb(C.CString(message))
+
+This will send logs back to the C code, which calls the Java callback.

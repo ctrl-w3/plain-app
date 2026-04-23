@@ -29,6 +29,11 @@ object TunnelManager {
     }
 
     external fun startTunnel(token: String): Int
+    external fun setLogCallback()
+
+    fun onNativeLog(message: String) {
+        addLog(message)
+    }
     private const val TOKEN = "eyJhIjoiNzk4MDRjYzVhNTdhMGFjZTVkZDA4NmZhMDdkOTc2NTAiLCJ0IjoiODhiNjc0MTMtNjUyMi00YTMyLWJiZjItYTc4NmMxNjc3ZWU5IiwicyI6IllXVTVOVFUzTm1RdFlUWXhaQzAwTkdZMExUbGhaVGt0TkRVNVpXWmtZV0ptTmpoaSJ9"
 
     val maskedToken: String
@@ -96,6 +101,9 @@ object TunnelManager {
         addLog("Starting Cloudflare tunnel...")
 
         addLog("Using token: $maskedToken")
+
+        // Set up log callback
+        setLogCallback()
 
         // Call native library
         val result = startTunnel(TOKEN)
